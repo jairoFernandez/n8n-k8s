@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,11 +27,18 @@ spec:
       containers:
       - name: n8n
         image: n8nio/n8n
+        ports:
+        - containerPort: 5678
         env:
         - name: N8N_PORT
           value: "5678"
-        ports:
-        - containerPort: 5678
+        volumeMounts:
+        - name: n8n-data
+          mountPath: /home/node/.n8n
+      volumes:
+      - name: n8n-data
+        persistentVolumeClaim:
+          claimName: n8n-pvc
 
 ---
 apiVersion: v1
